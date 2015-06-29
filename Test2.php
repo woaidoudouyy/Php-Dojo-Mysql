@@ -42,7 +42,7 @@
       if($body != '')
       {
         // send the body
-        echo $body;
+        echo json_encode($body);
         exit;
       }
       // create some body messages
@@ -219,29 +219,55 @@
         $username = $data->getRequestVars()['username'];
         $active = $data->getRequestVars()['active']; 
         $password = $data->getRequestVars()['password'];   
-        $stmt = $connection->prepare("INSERT INTO user.user_name VALUES (default, ?)");
-        $stmt->bind_param('s', $username);
-        if ($stmt->execute()) {
-          $user_name_id = $connection->insert_id;  
-          $stmt->close();                  
-          $stmt = $connection->prepare("UPDATE user.user SET user_name_id=?, password=?, actived=? WHERE id = ?");
-          $stmt->bind_param('isid', $user_name_id, $password, $active, $id);
-          if ($stmt->execute()) {
-            $stmt->close();
-            $connection->close();
-            RestUtils::sendResponse(202);          
-          } else {
-            $err = $connection->error;
-            $stmt->close();
-            $connection->close();
-            RestUtils::sendResponse(500, $err);
-          }         
+        $query  = " u.id, u.password, un.description, u.actived ";      
+        if ($result = $connection->query("SELECT un.description FROM user.user u JOIN user.user_name un ON un.id = u.user_name_id WHERE u.id = ". $id)) {
+            if($subject = mysqli_fetch_assoc($result)) {
+                  $curUserName = $subject["description"];
+                  if($curUserName != $username) {
+                      $stmt = $connection->prepare("INSERT INTO user.user_name VALUES (default, ?)");
+                      $stmt->bind_param('s', $username);
+                      if ($stmt->execute()) {
+                          $user_name_id = $connection->insert_id;  
+                          $stmt->close();                  
+                          $stmt = $connection->prepare("UPDATE user.user SET user_name_id=?, password=?, actived=? WHERE id = ?");
+                          $stmt->bind_param('isid', $user_name_id, $password, $active, $id);
+                          if ($stmt->execute()) {
+                            $stmt->close();
+                            $connection->close();
+                            RestUtils::sendResponse(202);          
+                          } else {
+                            $err = $connection->error;
+                            $stmt->close();
+                            $connection->close();
+                            RestUtils::sendResponse(500, $err);
+                          }         
+                      } else {
+                        $err = $connection->error;
+                        $stmt->close();
+                        $connection->close();
+                        RestUtils::sendResponse(500, $err);
+                      }
+                } else {
+                    $stmt = $connection->prepare("UPDATE user.user SET password=?, actived=? WHERE id = ?");
+                    $stmt->bind_param('sid', $password, $active, $id);
+                    if ($stmt->execute()) {
+                        $stmt->close();
+                        $connection->close();
+                        RestUtils::sendResponse(202);          
+                    } else {
+                        $err = $connection->error;
+                        $stmt->close();
+                        $connection->close();
+                        RestUtils::sendResponse(500, $err);
+                    }       
+                }
+            }
         } else {
           $err = $connection->error;
           $stmt->close();
           $connection->close();
           RestUtils::sendResponse(500, $err);
-        }       
+        }      
         break;
       case 'post':
        //Perform database query
@@ -255,10 +281,11 @@
           $stmt->close();               
           $stmt = $connection->prepare("INSERT INTO user.user VALUES (default, ?, ?, ?, false, null)");
           $stmt->bind_param('isi', $user_name_id, $password, $active);
-          if ($stmt->execute()) {
-            $stmt->close();
+          if ($stmt->execute()) {            
             $id = $connection->insert_id;
-            RestUtils::sendResponse(201, $id);          
+            $stmt->close();
+            $connection->close();
+            RestUtils::sendResponse(201, array('id' => $id), "application/json");          
           } else {
             $err = $connection->error;
             $stmt->close();

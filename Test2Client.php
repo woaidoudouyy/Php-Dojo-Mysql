@@ -89,7 +89,7 @@
 				<td><input type="hidden" value="<?php echo $subject["id"] ?>" id="<?php echo $hiddenId ?>"/></td>
 				<td style ="display:none;" id = "<?php echo $addBtnClass?>" >[&nbsp;<a href="#"  onClick ="sendText(this)"  id="<?php echo $addId ?>">add</a>&nbsp;]</td>
 				<td style ="display:inline;" id = "<?php echo $updateBtnClass?>" >[&nbsp;<a href="#" onClick ="updateText(this)" id="<?php echo $updateId?>">update</a>&nbsp;]</td>
-				<td style ="display:inline;" id = "<?php echo $deleteBtnClass?>">[&nbsp;<a href="#" onClick ="deleteText(this,<?php echo $hiddenId ?>)" id="<?php echo $deleteId?>">delete</a>&nbsp;]</td>
+				<td style ="display:inline;" id = "<?php echo $deleteBtnClass?>">[&nbsp;<a href="#" onClick ="deleteText(this)" id="<?php echo $deleteId?>">delete</a>&nbsp;]</td>
 			</tr>
 	  	<?php
 				} else {
@@ -107,7 +107,7 @@
 				<td><input type="hidden" id="<?php echo $hiddenId ?>"/></td>			
 				<td id = "<?php echo $addBtnClass?>" style ="display:inline;">[&nbsp;<a href="#" class = "addBtn" onClick ="sendText(this)" id="<?php echo $addId ?>">add</a>&nbsp;]</td>
 				<td id = "<?php echo $updateBtnClass?>" style ="display:none;">[&nbsp;<a href="#"class = "updateBtn" onClick ="updateText(this)" id="<?php echo $updateId?>">update</a>&nbsp;]</td>
-				<td id = "<?php echo $deleteBtnClass?>" style ="display:none;">[&nbsp;<a href="#" class = "deleteBtn" onClick ="deleteText(this,<?php echo $hiddenId ?>)" id="<?php echo $deleteId?>">delete</a>&nbsp;]</td>			
+				<td id = "<?php echo $deleteBtnClass?>" style ="display:none;">[&nbsp;<a href="#" class = "deleteBtn" onClick ="deleteText(this)" id="<?php echo $deleteId?>">delete</a>&nbsp;]</td>			
 			</tr>
 		<?php
 				}
@@ -129,16 +129,17 @@
 			var usernameId = "userName" + seq;
 			var passwordId ="password"+seq;
 			var activeId ="active" +seq;
+			var hiddentId = "hiddenId" + seq;
 			var username = document.getElementById(usernameId).value;
 			var password = document.getElementById(passwordId).value;
 			var active = document.getElementById(activeId).value;
 			var activeValue;
 
 			if (active==='activated'){
-				activeValue = 0;
+				activeValue = 1;
 			}
 			else if (active==='deactivated'){
-				activeValue = 1;
+				activeValue = 0;
 			}
 			require(["dojo/_base/xhr"], function(xhr){
 				var deleteBtn = document.getElementById("deleteBtn"+seq);
@@ -149,7 +150,7 @@
 
 			        url: "http://localhost/Test2.php", // read the url
 			        timeout: 3000, // give up after 3 seconds
-			        content: {  "id": seq,
+			        content: {  "id": -1,
 				    "username":username,
 				    "password":password,
 				    "active": activeValue },
@@ -158,6 +159,7 @@
 					        addBtn.style.display = 'none';
 					        deleteBtn.style.display = "inline";
 					        updateBtn.style.display = "inline";
+					        document.getElementById(hiddentId).value = response.id;
 					   },
 				    error : function(response,ioargs) {
 					    alert(response.responseText);
@@ -172,20 +174,21 @@
 
 		var elemId = elem.id
 		var seq = elemId.substr(elemId.length - 1);
-		alert(seq);
 		var usernameId = "userName" + seq;
 		var passwordId ="password"+seq;
 		var activeId ="active" +seq;
+		var hiddentId = "hiddenId" + seq;
 		var username = document.getElementById(usernameId).value;
 		var password = document.getElementById(passwordId).value;
 		var active = document.getElementById(activeId).value;
+		var actualId =  document.getElementById(hiddentId).value ;
 		var activeValue;
 
 		if (active==='activated'){
-			activeValue = 0;
+			activeValue = 1;
 		}
 		else if (active==='deactivated'){
-			activeValue = 1;
+			activeValue = 0;
 		}
 
 		require(["dojo/_base/xhr"], function(xhr){
@@ -198,6 +201,7 @@
 			        url: "http://localhost/Test2.php", // read the url
 			        timeout: 3000, // give up after 3 seconds
 			        content: {  
+			        	"id":actualId,
 				    "username":username,
 				    "password":password,
 				    "active": activeValue },
@@ -215,26 +219,38 @@
 			});
 
 	}
-	function deleteText(elem,hid){
+	function deleteText(elem){
+		var elemId = elem.id
+		var seq = elemId.substr(elemId.length - 1);
+			var usernameId = "userName" + seq;
+		var passwordId ="password"+seq;
+		var activeId ="active" +seq;
+		var hiddentId = "hiddenId" + seq;
+		var username = document.getElementById(usernameId);
+		var password = document.getElementById(passwordId);
+		var active = document.getElementById(activeId);
+		var actualId =  document.getElementById(hiddentId) ;
 		var deleteBtn = document.getElementById("deleteBtn"+seq);
 		var updateBtn = document.getElementById("updateBtn"+seq);
 		var addBtn = document.getElementById("addBtn"+seq);
-		var elemId = elem.id
-		var seq = elemId.substr(elemId.length - 1);
-	  
-		var hiddenId = hid.value;
 		
-		alert(hid.value)
+		
+
 	
 		var xhrArgs = {
 		      url: "http://localhost/Test2.php",
-		      content: {  "hiddenId": hiddenId},
+		      content: {  "id": actualId.value},
 		      load: function(data){
 		         alert('User has been Deleted Successfully!');
 					        addBtn.style.display = 'inline';
 					        deleteBtn.style.display = "none";
 					        alert(deleteBtn.style.display)
 					        updateBtn.style.display = "none";
+					         username.value = "";
+					 password.value = "";
+		active.value = "";
+		 actualId.value = "";
+
 		      }
 		      
 		    }
