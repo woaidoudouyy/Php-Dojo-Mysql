@@ -3,7 +3,7 @@ two exercises for using PHP/ Dojo /Mysql
 
 ## Set up
  
-In order to run the project, you need have install Mysql server, Apache server, 5.* php
+In order to run the project, you need install Mysql server, Apache server, 5.* php
 (apache in preinstalled in mac) If you are using window OS please go to the link below and download the WAMP server
 http://www.wampserver.com/en/
 
