@@ -17,3 +17,46 @@ User database has user table (all user information) and username table (all regi
 
 
 ![GitHub Logo](/readme/tableSchema.png)
+
+##Screen shots
+
+Main Page
+
+Created a simple animation mainpage with Adobe edge
+
+![GitHub Logo](/readme/mainpage.png)
+
+Test1: Client report for calculate transaction cost
+<50 $0.5 per transaction   >50 $0.75 per transaction
+
+![GitHub Logo](/readme/test1.png)
+
+Test2: Two parts (restful service: Test2.php and client: Test2Client.php)
+
+restful service support 4 http method the client side can use ajax to get the json response
+
+-Get get all user
+-Post new user
+-Put update user
+-Delete delete user
+
+![GitHub Logo](/readme/test2.png)
+
+Can't create user with duplicated username(display error message from response object: OnError)
+
+![GitHub Logo](/readme/addError.png)
+
+Create a new user 
+![GitHub Logo](/readme/addSuccess.jpg)
+
+Update a user 
+![GitHub Logo](/readme/update.jpg)
+
+Delete a user 
+![GitHub Logo](/readme/delete.jpg)
+
+
+
+
+
+
